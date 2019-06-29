@@ -89,7 +89,118 @@ class UniformSpace1D:
             self.back_diff(A,ind,N,h)
         else:
             self.central_diff(A,ind,N,h)
+'''
+class Node:
+    def __init__(self,loc,is_edge=False):
+        self.loc = loc
+        self.neighbors = []
+        self.is_edge = is_edge
+    def setloc(self,loc):
+        self.loc = np.array(loc)
+'''
 
+class Space:
+    def __init__(self):
+        self.dimnames = []
+        self.count = 0
         
+    def add_dimension(self,name):
+        self.dimnames.append(name)
 
+    def nodegen(self,val):
+        node = Node(self,self.count,val)
+        self.count+=1
+        return node
+
+
+class Node:
+    def __init__(self,refspace,N,val):
+        self.refspace = refspace
+        self.N = N
+        self.val = np.array(val)
+        self.neighbors = []
+        
+    def get_val(self,dimname):
+        ind = self.refspace.dimnames.index(dimname)
+        return self.val[ind]
+
+    def diff(self,dim1,dim2,N,h):
+        p = N+h
+        A = np.zeros((p,p))
+        b = np.zeros(p)
+        A[0][0] = 1 #all f_i cancel to zero
+        current_node = self
+        indexed_nodes = [self.N]
+        walker = NodeWalker(self,p)
+        column = 1
+        y = [self.get_val(dim1)]
+        for n in walker:
+            h = n.get_val(dim2) - self.get_val(dim2)
+            y.append(n.get_val(dim1))
+            for i in range(p):
+                A[i][column] = h**i
+            column+=1
+        b[N] = factorial(N)
+        coeffs = np.linalg.solve(A,b)
+        return coeffs, np.array(walker.visited)
+            
+            
+            
+
+class NodeWalker:
+    '''
+    tbh I hate this solution to this problem
+    it's not elegant or efficient. Please someone
+    who is actually good at computer science make
+    a class that isn't a steaming pile of shit
+    '''
+    def __init__(self,node,N):
+        self.startnode = node
+        self.visited = [node.N]
+        self.layer = [node]
+        self.N = N
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        '''
+        Please someone who knows graph theory make this not suck
+        '''
+        if len(self.visited) == self.N:
+            raise StopIteration()
+        for n in self.layer:
+            for n2 in n.neighbors:
+                if n2.N not in self.visited:
+                    self.visited.append(n2.N)
+                    return n2
+        newlayer = []
+        for l in self.layer:
+            newlayer.extend(l.neighbors)
+        self.layer = newlayer
+        
+        for n in self.layer:
+            for n2 in n.neighbors:
+                if n2.N not in self.visited:
+                    self.visited.append(n2.N)
+                    return n2
+
+                
+def nodelinspace(start,stop,N):
+    '''Delete this'''
+    space = Space()
+    space.add_dimension("x")
+    space.add_dimension("y")
+    node_list = [space.nodegen([i,i**2]) for i in np.linspace(start,stop,N)]
+    node_list[0].neighbors.append(node_list[1])
+    node_list[-1].neighbors.append(node_list[-2])
+    for i in range(1,len(node_list)-1):
+        node_list[i].neighbors.append(node_list[i-1])
+        node_list[i].neighbors.append(node_list[i+1])
+    return node_list
+        
+            
+        
+        
+    
     
