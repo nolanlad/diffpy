@@ -1,9 +1,34 @@
 import numpy as np
+from scipy import linalg
 
 
 '''============================================================
 Helper functions to find the coefficents of finite differencing
 ============================================================'''
+
+def solve_non_square(A,b):
+    L,U = linalg.lu(A,permute_l = True)
+    trivial_col = 0
+    for i in range(len(U)):
+        if U[i][i] == 0:
+            trivial_col = i
+            break
+    Ut = np.transpose(U)
+    useful_rows = []
+    for i in range(U.shape[0]):
+        for j in range(U.shape[1]):
+            if U[i][j] != 0:
+                useful_rows.append(j)
+                break
+    useful_rows = np.array(useful_rows)
+    Ut2 = Ut[useful_rows]
+    U2 = np.transpose(Ut2)
+    b2 = np.linalg.inv(L)@b
+    solnt = np.linalg.solve( U2,b2 )
+    soln = np.zeros(U.shape[1])
+    soln[useful_rows] = solnt
+    return soln
+    
 
 def factorial(N):
     if N == 0:
@@ -12,6 +37,9 @@ def factorial(N):
     for i in range(1,N+1):
         tot*=i
     return tot
+
+def n_combos(n,r):
+    return factorial(n+r-1)/((factorial(r)*factorial(n-1)))
 
 def get_p(N,h):
     p = ((2*((N+1)/2))-2 + h)/2
@@ -102,16 +130,21 @@ class Node:
 class Space:
     def __init__(self):
         self.dimnames = []
+        self.dependent_dims = []
         self.count = 0
         
     def add_dimension(self,name):
         self.dimnames.append(name)
 
+    def add_non_fixed_dimension(self,name):
+        self.dependent_dims.addend(name)
+
     def nodegen(self,val):
         node = Node(self,self.count,val)
         self.count+=1
         return node
-
+        
+        
 
 class Node:
     def __init__(self,refspace,N,val):
@@ -124,6 +157,18 @@ class Node:
         ind = self.refspace.dimnames.index(dimname)
         return self.val[ind]
 
+    def get_vals(self,dims):
+        return np.array([self.get_val(d) for d in dims])
+
+    def link(self,other):
+        self.neighbors.append(other)
+
+    def get_neighbors(self,N,var_dim):
+        walker = NodeWalker(self,N)
+        walker.add_invariance(var_dim)
+        nodes = [n for n in walker]
+        return nodes
+    
     def diff(self,dim1,dim2,N,h):
         p = N+h
         A = np.zeros((p,p))
@@ -143,8 +188,7 @@ class Node:
         b[N] = factorial(N)
         coeffs = np.linalg.solve(A,b)
         return coeffs, np.array(walker.visited)
-            
-            
+
             
 
 class NodeWalker:
@@ -159,11 +203,12 @@ class NodeWalker:
         self.visited = [node.N]
         self.layer = [node]
         self.N = N
+        self.variance_dim = None
 
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         '''
         Please someone who knows graph theory make this not suck
         '''
@@ -172,8 +217,12 @@ class NodeWalker:
         for n in self.layer:
             for n2 in n.neighbors:
                 if n2.N not in self.visited:
-                    self.visited.append(n2.N)
-                    return n2
+                    if self.variance_dim != None and (n2.get_val(self.variance_dim) -
+                        self.startnode.get_val(self.variance_dim)) != 0:
+                        self.visited.append(n2.N)
+                        return n2
+                    #else:
+                     #   self.visited.append(n2.N)
         newlayer = []
         for l in self.layer:
             newlayer.extend(l.neighbors)
@@ -182,8 +231,20 @@ class NodeWalker:
         for n in self.layer:
             for n2 in n.neighbors:
                 if n2.N not in self.visited:
-                    self.visited.append(n2.N)
-                    return n2
+                    if (n2.get_val(self.variance_dim) - self.startnode.get_val(self.variance_dim)) != 0:
+                        self.visited.append(n2.N)
+                        return n2
+                    #else:
+                    #    self.visited.append(n2.N)
+                        
+    def next(self):
+        return self.__next__()
+
+    def add_variance_var(self,dim):
+        self.variance_dim = dim
+
+        
+        
 
                 
 def nodelinspace(start,stop,N):
@@ -198,9 +259,26 @@ def nodelinspace(start,stop,N):
         node_list[i].neighbors.append(node_list[i-1])
         node_list[i].neighbors.append(node_list[i+1])
     return node_list
-        
-            
-        
+    
+
+def nodesquare():
+    space = Space()
+    space.add_dimension("x")
+    space.add_dimension("y")
+    #space.add_dimension("z")
+    nodelist = []
+    for i in range(-1,2):
+        for j in range(-1,2):
+            nodelist.append(space.nodegen([i,j]))
+    for i in [0,1,2,3,4,5,6,7,8]:
+        nodelist[4].link(nodelist[i])
+    return nodelist
         
     
+
+def test1(node,dim1,dim2,N,h):
+    ne = node.get_neighbors(node)
+    #get diffs
+    #check invariability
+    #remove invariates
     
