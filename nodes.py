@@ -15,11 +15,14 @@ class Node:
         return np.array([self.get_val(d) for d in dims])
 
     def link(self,other):
-        self.neighbors.append(other)
+        if other not in self.neighbors:
+            self.neighbors.append(other)
+        if self not in other.neighbors:
+            other.neighbors.append(self)
 
     def get_neighbors(self,N,var_dim):
         walker = NodeWalker(self,N)
-        walker.add_invariance(var_dim)
+        walker.add_variance_var(var_dim)
         nodes = [n for n in walker]
         return nodes
 
@@ -36,7 +39,7 @@ class NodeWalker:
         self.layer = [node]
         self.N = N
         self.variance_dim = None
-        self.count =0
+        self.count =1
 
     def __iter__(self):
         return self
@@ -45,7 +48,7 @@ class NodeWalker:
         '''
         Please someone who knows graph theory make this not suck
         '''
-        if self.count == self.N-1:
+        if self.count == self.N:
             raise StopIteration()
         for n in self.layer:
             for n2 in n.neighbors:

@@ -16,3 +16,14 @@ class Space:
         node = Node(self,self.count,val)
         self.count+=1
         return node
+
+class Space2:
+    def __init__(self,dims,dep_dims):
+        self.dimnames = dims
+        self.dependent_dims = dep_dims
+        self.count = 0
+
+    def nodegen(self,val):
+        node = Node(self,self.count,val)
+        self.count+=1
+        return node
