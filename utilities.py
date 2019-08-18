@@ -44,6 +44,20 @@ def solve_linearly_dependent(matrix,b):
     print(np.allclose(np.matmul(matrix,soln),b))
     return soln
 
+def get_linearly_dependent_rows(matrix,b):
+    dept_rows = []
+    for i in range(matrix.shape[0]):
+        for j in range(matrix.shape[0]):
+            if i != j:
+                inner_product = np.inner(matrix[i],matrix[j])
+                norm_i = np.linalg.norm(matrix[i])
+                norm_j = np.linalg.norm(matrix[j])
+                if np.abs(inner_product - norm_j * norm_i) < 1E-5:
+                    dept_rows.extend([i,j])
+    idxs = list(set(dept_rows))
+    return idxs
+    
+
 
 def factorial(N):
     if N == 0:
