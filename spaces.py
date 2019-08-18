@@ -1,4 +1,4 @@
-from nodes import Node
+from IrregularNode import IrregularNode
 from RegularNode import RegularNode
 
 # class Space:
@@ -43,6 +43,6 @@ class IrregularSpace(Space):
         Space.__init__(self)
 
     def nodegen(self,val):
-        node = Node(self,self.count,val)
+        node = IrregularNode(self,self.count,val)
         self.count+=1
         return node

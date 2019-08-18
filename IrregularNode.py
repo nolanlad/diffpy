@@ -1,10 +1,9 @@
 import numpy as np
-from utilities import *
 from Node import Node
 
-class RegularNode(Node):
+class IrregularNode(Node):
     def __init__(self,refspace,N,val):
-        Node.__init__(self,refspace,N,val)
+        Node.__init(self,refspace,N,val)
     # def __init__(self,refspace,N,val):
     #     self.refspace = refspace
     #     self.N = N
@@ -25,32 +24,12 @@ class RegularNode(Node):
     #         other.neighbors.append(self)
 
     def get_neighbors(self,N,var_dim):
-        walker = RegularNodeWalker(self,N)
+        walker = IrregularNodeWalker(self,N)
         walker.add_variance_var(var_dim)
         nodes = [n for n in walker]
         return nodes
-    
-    def diff(self,dim,N,h):
-        ndims = 1
-        p = int(n_combos(ndims+1,N+h))
-        nodds = self.get_neighbors(p,dim)
-        nodds.append(self)
-        stiffness = np.zeros((int(p),int(p)))
-        diffs = []
-        for i in range(p):
-            dif = nodds[i].get_vals([dim]) - self.get_vals([dim])
-            diffs.append(dif)
-            #print(dif)
-            stiffness[:,i] = make_combos(dif,N+h)
-        thelist = make_combos2([dim],N+h)
-        b = np.zeros(int(p))
-        b[thelist.index(dim*N)] = factorial(N)
-        ids = np.array([n.N for n in nodds])
-        #print(thelist)
-        soln = np.linalg.solve(stiffness,b)
-        return ids,soln
 
-class RegularNodeWalker:
+class IrregularNodeWalker:
     '''
     tbh I hate this solution to this problem
     it's not elegant or efficient. Please someone
@@ -65,15 +44,9 @@ class RegularNodeWalker:
         self.variance_dim = None
         self.count =1
 
-    def add_variance_var(self,dim):
-        self.variance_dim = dim
-        all_dims = np.array(self.startnode.refspace.dimnames)
-        self.invariance_dims = all_dims[np.where(all_dims != dim)]
-
-
     def __iter__(self):
         return self
-        
+
     def __next__(self):
         '''
         Please someone who knows graph theory make this not suck
@@ -83,8 +56,8 @@ class RegularNodeWalker:
         for n in self.layer:
             for n2 in n.neighbors:
                 if n2.N not in self.visited:
-                    if np.all((n2.get_vals(self.invariance_dims) - \
-                        self.startnode.get_vals(self.invariance_dims)) == 0):
+                    if self.variance_dim != None and (n2.get_val(self.variance_dim) -
+                        self.startnode.get_val(self.variance_dim)) != 0:
                         self.visited.append(n2.N)
                         self.count+=1
                         return n2
@@ -94,13 +67,20 @@ class RegularNodeWalker:
         for l in self.layer:
             newlayer.extend(l.neighbors)
         self.layer = newlayer
+        
         for n in self.layer:
             for n2 in n.neighbors:
                 if n2.N not in self.visited:
-                    if np.all((n2.get_vals(self.invariance_dims) - \
-                        self.startnode.get_vals(self.invariance_dims)) == 0):
+                    if (n2.get_val(self.variance_dim) - self.startnode.get_val(self.variance_dim)) != 0:
                         self.visited.append(n2.N)
                         self.count+=1
                         return n2
                     else:
                         self.visited.append(n2.N)
+                        
+    def next(self):
+        return self.__next__()
+
+    def add_variance_var(self,dim):
+        self.variance_dim = dim
+

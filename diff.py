@@ -1,4 +1,6 @@
-from nodes import Node, NodeWalker
+#from nodes import Node, NodeWalker
+from IrregularNode import IrregularNode, IrregularNodeWalker
+from RegularNode import RegularNode, RegularNodeWalker
 from utilities import *
 from spaces import Space, RegularSpace
 import numpy as np
