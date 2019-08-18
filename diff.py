@@ -1,6 +1,6 @@
 from nodes import Node, NodeWalker
 from utilities import *
-from spaces import Space, Space2
+from spaces import Space, RegularSpace
 import numpy as np
 
 def differentiate(node,dim2,N,h):
@@ -80,7 +80,7 @@ def nodesquare():
     return nodelist
 
 def nodesquare2():
-    space = Space2(('x','y'),('z'))
+    space = RegularSpace(('x','y'),('z'))
     #space.add_dimension("x")
     #space.add_dimension("y")
     nodelist = []
@@ -92,7 +92,7 @@ def nodesquare2():
     return nodelist
 
 def node_rect():
-    space = Space2(('x','y'),('T'))
+    space = RegularSpace(('x','y'),('T'))
     x = np.linspace(0,9,10)
     y = x
     xx,yy = np.meshgrid(x,y)
@@ -145,7 +145,7 @@ def nodelinspace2():
     
 def nodelinspace3():
     nodes = []
-    space = Space2(('x','y'),('T'))
+    space = RegularSpace(('x','y'),('T'))
     for i in np.arange(20):
         node = space.nodegen([i,0])
         nodes.append(node)
