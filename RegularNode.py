@@ -1,28 +1,11 @@
 import numpy as np
 from utilities import *
 from Node import Node
+from matrix import solve_matrix_inf
 
 class RegularNode(Node):
     def __init__(self,refspace,N,val):
         Node.__init__(self,refspace,N,val)
-    # def __init__(self,refspace,N,val):
-    #     self.refspace = refspace
-    #     self.N = N
-    #     self.val = np.array(val)
-    #     self.neighbors = []
-        
-    # def get_val(self,dimname):
-    #     ind = self.refspace.dimnames.index(dimname)
-    #     return self.val[ind]
-
-    # def get_vals(self,dims):
-    #     return np.array([self.get_val(d) for d in dims])
-
-    # def link(self,other):
-    #     if other not in self.neighbors:
-    #         self.neighbors.append(other)
-    #     if self not in other.neighbors:
-    #         other.neighbors.append(self)
 
     def get_neighbors(self,N,var_dim):
         walker = RegularNodeWalker(self,N)
@@ -47,7 +30,8 @@ class RegularNode(Node):
         b[thelist.index(dim*N)] = factorial(N)
         ids = np.array([n.N for n in nodds])
         #print(thelist)
-        soln = np.linalg.solve(stiffness,b)
+        #soln = np.linalg.solve(stiffness,b)
+        soln = solve_matrix_inf(stiffness,b)
         return ids,soln
 
 class RegularNodeWalker:
@@ -68,7 +52,10 @@ class RegularNodeWalker:
     def add_variance_var(self,dim):
         self.variance_dim = dim
         all_dims = np.array(self.startnode.refspace.dimnames)
-        self.invariance_dims = all_dims[np.where(all_dims != dim)]
+        if len(all_dims) == 1:
+            self.invariance_dims = None
+        else:
+            self.invariance_dims = all_dims[np.where(all_dims != dim)]
 
 
     def __iter__(self):
@@ -83,13 +70,18 @@ class RegularNodeWalker:
         for n in self.layer:
             for n2 in n.neighbors:
                 if n2.N not in self.visited:
-                    if np.all((n2.get_vals(self.invariance_dims) - \
-                        self.startnode.get_vals(self.invariance_dims)) == 0):
+                    if self.invariance_dims != None:
+                        if np.all((n2.get_vals(self.invariance_dims) - \
+                            self.startnode.get_vals(self.invariance_dims)) == 0):
+                            self.visited.append(n2.N)
+                            self.count+=1
+                            return n2
+                        else:
+                            self.visited.append(n2.N)
+                    else:
                         self.visited.append(n2.N)
                         self.count+=1
                         return n2
-                    else:
-                        self.visited.append(n2.N)
         newlayer = []
         for l in self.layer:
             newlayer.extend(l.neighbors)
@@ -97,10 +89,15 @@ class RegularNodeWalker:
         for n in self.layer:
             for n2 in n.neighbors:
                 if n2.N not in self.visited:
-                    if np.all((n2.get_vals(self.invariance_dims) - \
-                        self.startnode.get_vals(self.invariance_dims)) == 0):
+                    if self.invariance_dims != None:
+                        if np.all((n2.get_vals(self.invariance_dims) - \
+                            self.startnode.get_vals(self.invariance_dims)) == 0):
+                            self.visited.append(n2.N)
+                            self.count+=1
+                            return n2
+                        else:
+                            self.visited.append(n2.N)
+                    else:
                         self.visited.append(n2.N)
                         self.count+=1
                         return n2
-                    else:
-                        self.visited.append(n2.N)

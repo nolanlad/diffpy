@@ -2,7 +2,7 @@
 from IrregularNode import IrregularNode, IrregularNodeWalker
 from RegularNode import RegularNode, RegularNodeWalker
 from utilities import *
-from spaces import Space, RegularSpace
+from spaces import Space, RegularSpace, IrregularSpace
 import numpy as np
 
 def differentiate(node,dim2,N,h):
@@ -95,6 +95,7 @@ def nodesquare2():
 
 def node_rect():
     space = RegularSpace(('x','y'),('T'))
+    # space = IrregularSpace(('x','y'),('T'))
     x = np.linspace(0,9,10)
     y = x
     xx,yy = np.meshgrid(x,y)
@@ -135,7 +136,7 @@ def nodelinspace():
 
 def nodelinspace2():
     nodes = []
-    space = Space2(('x'),('T'))
+    space = RegularSpace(['x'],['T'])
     for i in np.arange(20):
         node = space.nodegen([i])
         nodes.append(node)
@@ -155,3 +156,39 @@ def nodelinspace3():
         nodes[i].link(nodes[i-1])
         nodes[i].link(nodes[i+1])
     return nodes
+
+def node_test1():
+    nodes =[]
+    space = IrregularSpace(('x','y'),('T'))
+    nodes.append(space.nodegen([0,0]))
+    xs = np.array([-1,1,2,2,1,-1,-1,1,2])
+    ys = np.array([0,0,0,2,2,1,-1,-1,-2])
+    for z in zip(xs,ys):
+        vals = np.array(z)
+        node = space.nodegen(vals)
+        nodes[0].link(node)
+        nodes.append(node)
+    diffs,A = differentiate_debug2(nodes[0],'x',3,0)
+    return diffs,A
+    
+def node_test2(x,y,N):
+    nodes =[]
+    space = IrregularSpace(('x','y'),('T'))
+    p = int(n_combos(3,N))
+    for z in zip(x,y):
+        vals = np.array(z)
+        node = space.nodegen(vals)
+        if nodes != []:
+            nodes[0].link(node)
+        nodes.append(node)
+    A = np.zeros((p,p))
+    for i in range(p):
+        dif = nodes[i].get_vals(('x','y')) - node.get_vals(('x','y'))
+        A[:,i] = make_combos(dif,N)
+    print(make_combos2(('x','y'),N))
+    print(np.linalg.det(A))
+    if np.linalg.det(A)==0:
+        print(np.linalg.matrix_rank(A))
+    else:
+        print("shits ok")
+    return A

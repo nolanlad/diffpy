@@ -6,6 +6,7 @@ class Node:
         self.N = N
         self.val = np.array(val)
         self.neighbors = []
+        self.is_edge = False
         
     def get_val(self,dimname):
         ind = self.refspace.dimnames.index(dimname)
