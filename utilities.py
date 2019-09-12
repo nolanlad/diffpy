@@ -20,7 +20,7 @@ def solve_non_square(A,b):
     useful_rows = np.array(useful_rows)
     Ut2 = Ut[useful_rows]
     U2 = np.transpose(Ut2)
-    b2 = np.linalg.inv(L)@b
+    b2 = np.matmul(np.linalg.inv(L),b)
     solnt = np.linalg.solve( U2,b2 )
     soln = np.zeros(U.shape[1])
     soln[useful_rows] = solnt

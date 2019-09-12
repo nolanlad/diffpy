@@ -94,7 +94,7 @@ def nodesquare2():
     return nodelist
 
 def node_rect():
-    space = RegularSpace(('x','y'),('T'))
+    space = IrregularSpace(('x','y'),('T'))
     # space = IrregularSpace(('x','y'),('T'))
     x = np.linspace(0,9,10)
     y = x
