@@ -29,11 +29,11 @@ class NodeWalker:
     who is actually good at computer science make
     a class that isn't a steaming pile of shit
     '''
-    def __init__(self,node,N):
+    def __init__(self,node):
         self.startnode = node
         self.visited = [node.N]
         self.layer = [node]
-        self.N = N
+        #self.N = N
         self.variance_dim = None
         self.count =1
 
@@ -47,13 +47,9 @@ class NodeWalker:
         for n in self.layer:
             for n2 in n.neighbors:
                 if n2.N not in self.visited:
-                    if self.variance_dim != None and (n2.get_val(self.variance_dim) -
-                        self.startnode.get_val(self.variance_dim)) != 0:
-                        self.visited.append(n2.N)
-                        self.count+=1
-                        return n2
-                    else:
-                        self.visited.append(n2.N)
+                    self.visited.append(n2.N)
+                    self.count+=1
+                    return n2
         newlayer = []
         for l in self.layer:
             newlayer.extend(l.neighbors)
@@ -62,12 +58,9 @@ class NodeWalker:
         for n in self.layer:
             for n2 in n.neighbors:
                 if n2.N not in self.visited:
-                    if (n2.get_val(self.variance_dim) - self.startnode.get_val(self.variance_dim)) != 0:
-                        self.visited.append(n2.N)
-                        self.count+=1
-                        return n2
-                    else:
-                        self.visited.append(n2.N)
+                    self.visited.append(n2.N)
+                    self.count+=1
+                    return n2
                         
     def next(self):
         return self.__next__()
