@@ -96,22 +96,23 @@ def nodesquare2():
 def node_rect():
     space = IrregularSpace(('x','y'),('T'))
     # space = IrregularSpace(('x','y'),('T'))
-    x = np.linspace(0,9,10)
+    grad = 100
+    x = np.linspace(0,grad-1,grad)
     y = x
     xx,yy = np.meshgrid(x,y)
     nodes = []
-    for i in range(10):
+    for i in range(grad):
         row = []
-        for j in range(10):
+        for j in range(grad):
             node = space.nodegen([xx[i][j],yy[i][j]])
             row.append(node)
         nodes.append(row)
-    for i in range(1,9):
-        for j in range(1,9):
+    for i in range(1,grad-1):
+        for j in range(1,grad-1):
             nodes[i][j].link(nodes[i][j+1])
             nodes[i][j].link(nodes[i][j-1])
-    for i in range(1,9):
-        for j in range(1,9):
+    for i in range(1,grad-1):
+        for j in range(1,grad-1):
             nodes[i][j].link(nodes[i-1][j])
             nodes[i][j].link(nodes[i+1][j])
             nodes[i][j].link(nodes[i+1][j+1])

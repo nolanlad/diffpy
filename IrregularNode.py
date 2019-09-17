@@ -1,5 +1,6 @@
 import numpy as np
 from Node import Node
+from NodeWalker2 import NodeWalker2
 from utilities import *
 
 class IrregularNode(Node):
@@ -7,9 +8,12 @@ class IrregularNode(Node):
         Node.__init__(self,refspace,N,val)
 
     def get_neighbors(self,N,var_dim):
-        walker = IrregularNodeWalker(self,N)
-        walker.add_variance_var(var_dim)
-        nodes = [n for n in walker]
+        # walker = IrregularNodeWalker(self,N)
+        walker = NodeWalker2(self,var_dim)
+        # walker.add_variance_var(var_dim)
+        # nodes = [n for n in walker]
+        nodes = [walker.__next__() for i in range(N-1)]
+        nodes.append(self)
         return nodes
     
     def diff(self,dim,N,h):
@@ -31,6 +35,29 @@ class IrregularNode(Node):
         soln = np.matmul(np.linalg.pinv(stiffness),b)
         print(np.allclose(np.matmul(stiffness,soln),b))
         return ids,soln
+
+    def diff2(node,dim2,N,h):
+        ndims = len(node.refspace.dimnames)+1
+        dimms = tuple(node.refspace.dimnames)
+        p = int(n_combos(ndims,N+h))
+        nodes = node.get_neighbors(p,dim2)
+        stiffness = np.zeros((int(p),int(p)))
+        diffs = []
+        for i in range(p):
+            dif = nodes[i].get_vals(dimms) - node.get_vals(dimms)
+            diffs.append(dif)
+            #print(dif)
+            stiffness[:,i] = make_combos(dif,N+h)
+        thelist = make_combos2(node.refspace.dimnames,N+h)
+        b = np.zeros(int(p))
+        b[thelist.index(dim2*N)] = factorial(N)
+        ids = np.array([n.N for n in nodes])
+        # print(thelist)
+        #print(stiffness)
+        #soln = solve_linearly_dependent(stiffness,b)
+        #return ids,soln
+        soln = np.matmul(np.linalg.pinv(stiffness),b)
+        return nodes,soln
     
 
 class IrregularNodeWalker:
