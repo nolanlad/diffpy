@@ -135,6 +135,17 @@ def nodelinspace():
         nodes[i].link(nodes[i+1])
     return nodes
 
+def nodelinspace_1D(els):
+    nodes = []
+    space = RegularSpace(['x'],['T'])
+    for i in els:
+        node = space.nodegen([i])
+        nodes.append(node)
+    for i in range(1,len(els)-1):
+        nodes[i].link(nodes[i-1])
+        nodes[i].link(nodes[i+1])
+    return nodes
+
 def nodelinspace2():
     nodes = []
     space = RegularSpace(['x'],['T'])
