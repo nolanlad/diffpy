@@ -204,3 +204,10 @@ def node_test2(x,y,N):
     else:
         print("shits ok")
     return A
+
+def svdsolve(a,b):
+    u,s,v = np.linalg.svd(a)
+    c = np.dot(u.T,b)
+    w = np.linalg.solve(np.diag(s),c)
+    x = np.dot(v.T,w)
+    return x

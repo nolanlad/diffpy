@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 class Node:
     def __init__(self,refspace,N,val):
@@ -67,3 +68,64 @@ class NodeWalker:
 
     def add_variance_var(self,dim):
         self.variance_dim = dim
+
+
+
+from utilities import *
+
+class Nodes:
+    def __init__(self,space):
+        self.dims = np.array([k for k in space])
+        self.lendims = len(self.dims)
+        self.lennodes = len(space[self.dims[0]]) 
+        self.idims = dict(zip(self.dims,range(self.lendims)))
+        self.space = np.zeros((self.lendims,self.lennodes))
+        for i,k in enumerate(self.dims):
+            self.space[i] = space[k]
+    def size(self):
+        return self.lennodes
+        #return len(self.space[self.dims[0]])
+    def get_dim(self,name):
+        return self.space[self.idims[name]]
+    def add_dims(self,dim):
+        'BAD! WIP'
+        for k in dim.keys():
+            self.space[k] = dim[k]
+    def get_node(self,i):
+        return SubNode(i,self)
+    def get_neighbors(self,i,dims,N):
+        mag = np.zeros(self.size())
+        nod = self.get_node(i)
+        diffsx = self.get_dim('x') - nod.get_dim('x')
+        diffsy = self.get_dim('y') - nod.get_dim('y')
+        '''
+        for d in dims:
+            dum = self.get_dim(d)
+            dum2 = nod.get_dim(d)
+            mag = mag + (dum-dum2)**2
+        return  SubNode(np.argsort(np.sqrt(mag))[:N],self)
+        '''
+        ang = np.argsort(np.arctan(np.abs(diffsy/diffsx)))
+        line = np.argsort(np.abs(diffs[ang]))
+
+    def plot(self,dim1,dim2,*args,**kwargs):
+        plt.plot(self.get_dim(dim1),self.get_dim(dim2),*args,**kwargs)
+'''
+    def diff(self,i):
+        A = np.zeros(6,6)
+        clos = self.get_neighbors(i,['x','y'],6)
+        nod = self.get_node(i)
+        diffsx = clos.get_dim('x') - nod.get_dim('x')
+        diffsx = clos.get_dim('y') - nod.get_dim('y')
+        for i in range(6):
+            return
+'''
+
+
+
+class SubNode(Nodes):
+    def __init__(self,i,refspace):
+        self.refspace = refspace
+        self.i = i
+    def get_dim(self,name):
+        return self.refspace.get_dim(name)[self.i]
