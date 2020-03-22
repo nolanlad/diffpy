@@ -58,6 +58,9 @@ def get_linearly_dependent_rows(matrix,b):
     return idxs
     
 
+def svdsolve(A,b):
+    Ainv = np.linalg.pinv(A)
+    return np.matmul(Ainv,b)
 
 def factorial(N):
     if N == 0:
@@ -69,7 +72,7 @@ def factorial(N):
 
 def n_combos(n,r):
     '''returns number of combinations with replacement of a set '''
-    return factorial(n+r-1)/((factorial(r)*factorial(n-1)))
+    return int(factorial(n+r-1)/((factorial(r)*factorial(n-1))))
 
 
 def make_combos(shit,n):

@@ -20,7 +20,7 @@ class IrregularNode(Node):
         ndims = 1
         p = int(n_combos(ndims+1,N+h))
         nodds = self.get_neighbors(p,dim)
-        nodds.append(self)
+        #nodds.append(self)
         stiffness = np.zeros((int(p),int(p)))
         diffs = []
         for i in range(p):
@@ -33,7 +33,7 @@ class IrregularNode(Node):
         ids = np.array([n.N for n in nodds])
         #solve using SVD closest answer
         soln = np.matmul(np.linalg.pinv(stiffness),b)
-        print(np.allclose(np.matmul(stiffness,soln),b))
+        #print(np.allclose(np.matmul(stiffness,soln),b))
         return ids,soln
 
     def diff2(node,dim2,N,h):
@@ -58,6 +58,7 @@ class IrregularNode(Node):
         #return ids,soln
         soln = np.matmul(np.linalg.pinv(stiffness),b)
         return nodes,soln
+    
     
 
 class IrregularNodeWalker:

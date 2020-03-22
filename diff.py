@@ -96,8 +96,8 @@ def nodesquare2():
 def node_rect():
     space = IrregularSpace(('x','y'),('T'))
     # space = IrregularSpace(('x','y'),('T'))
-    grad = 100
-    x = np.linspace(0,grad-1,grad)
+    grad = 10
+    x = np.linspace(0,1,10)
     y = x
     xx,yy = np.meshgrid(x,y)
     nodes = []
