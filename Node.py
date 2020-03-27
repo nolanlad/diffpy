@@ -117,7 +117,17 @@ class Nodes:
         
         # ang = np.argsort(np.arctan(np.abs(diffsy/diffsx)))
         # line = np.argsort(np.abs(diffs[ang]))
-        
+
+    def get_neighbors_y(self,i,N):
+        mag = np.zeros(self.size())
+        nod = self.get_node(i)
+        diffsx = self.get_dim('x') - nod.get_dim('x')
+        diffsy = self.get_dim('y') - nod.get_dim('y')
+        criterion = (np.abs(diffsy)+1)*np.arctan(0.1 + np.abs(diffsx))
+        # plt.imshow(criterion.reshape((10,10)))
+        # plt.colorbar()
+        # plt.show()
+        return  SubNode(np.argsort(criterion)[:N],self)
 
     def plot(self,dim1,dim2,*args,**kwargs):
         plt.plot(self.get_dim(dim1),self.get_dim(dim2),*args,**kwargs)

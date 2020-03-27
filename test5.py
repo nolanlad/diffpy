@@ -1,11 +1,7 @@
 import numpy as np 
 import matplotlib.pyplot as plt 
-from utilities import factorial
 from utilities import *
 
-def argmins(x,N):
-    sor = np.argsort(x)
-    return sor[:N]
 
 x = np.linspace(0,1,10)
 y = np.linspace(0,1,10)
@@ -17,66 +13,47 @@ yy = yy.reshape(-1)
 x1 = xx[25]
 y1 = yy[25]
 
-#xx = xx - x1
-#yy = yy - y1
 
-from Node import Nodes
+from Node2 import *
 
 n = Nodes({"x":xx,"y":yy})
-
-def diff(j,nods,D,h):
-    N = n_combos(3,2)
-    n = nods
-    clos = n.get_neighbors2(j,['x','y'],N)
-
-    nod = n.get_node(j)
-    '''
-    n.plot('x','y','ro')
-    clos.plot('x','y','bo')
-    plt.show()
-    '''
-    diffsx = clos.get_dim('x') - nod.get_dim('x')
-    diffsy = clos.get_dim('y') - nod.get_dim('y')
-
-    A = np.zeros((N,N))
-
-    for i in range(N):
-        A[:,i] = make_combos([diffsx[i],diffsy[i]],2)
-
-    #print(A)
-    b = [0,0,factorial(D),0,0,0]
-    #return A
-    #from diff import svdsolve
-    soln = svdsolve(A,b)
-    #print(soln)
-    return clos.i,soln
-
 
 i = 25
 M = n.lennodes
 A = np.zeros((M,M))
+Ay = np.zeros((M,M))
 for i in range(1,n.lennodes):
     #print(i)
-    ids, soln = diff(i,n,1,1)
+    # ids, soln = diff_x(i,n,1,1)
+    ids, soln = diff_gen(i,n,1,1,'x')
     A[i][ids] = soln
+    # ids, soln = diff_y(i,n,1,1)
+    ids, soln = diff_gen(i,n,1,1,'y')
+    Ay[i][ids] = soln
 
+# plt.imshow(Ay)
+# plt.show()
 
 z = (n.get_dim('x')**2)*n.get_dim('y')
+dzdy = (n.get_dim('x')**2)
 dza = np.matmul(A,z)
 ddza = np.matmul(A,dza)
-dz = 2*(n.get_dim('x'))*n.get_dim('y')
+dz = 2*(n.get_dim('x')*n.get_dim('y'))
 ddz =  2*n.get_dim('y')
 
 d = np.dot(z[ids],soln)
 
-plt.plot(ddza,ddz,'bo')
-plt.show()
-'''
-clos = n.get_neighbors2(0,['x','y'],6)
-n.plot('x','y','bo')
-clos.plot('x','y','ro')
-plt.show()
-'''
-#print(d)
+# plt.plot(ddza,ddz,'bo')
+# plt.show()
 
-#print(dz[i])
+dzdya = np.matmul(Ay,z)
+# plt.plot(dzdya,dzdy,'bo')
+# plt.show()
+
+test1 = np.allclose(dzdya,dzdy)
+test2 =  np.allclose(ddza,ddz)
+test3 = np.allclose(dza,dz)
+
+if test1 and test2 and test3:
+    print('TEST 5 passed')
+
