@@ -14,6 +14,9 @@ class Nodes:
             self.space[i] = space[k]
 
     def add_labels(self,labs,labnames):
+        '''labs: labels for nodes
+        labnames: dictionary containing meanings of labels
+        '''
         self.labels = labs
         self.labnames = labnames
     def size(self):
@@ -55,7 +58,10 @@ class Nodes:
         return  SubNode(np.argsort(criterion)[:N],self)
 
     def plot(self,dim1,dim2,*args,**kwargs):
-        plt.plot(self.get_dim(dim1),self.get_dim(dim2),*args,**kwargs)
+        for l in set(self.labels):
+            w = (self.labels == l)
+            plt.plot(self.get_dim(dim1)[w],self.get_dim(dim2)[w],'o',*args,**kwargs)
+        plt.legend([l for l in self.labnames])
 
 def diff_x(j,nods,D,h):
     N = n_combos(3,2)
@@ -79,7 +85,7 @@ def diff_x(j,nods,D,h):
     return clos.i,soln
 
 def diff_gen(j,nods,D,h,dim):
-    N = n_combos(3,2)
+    N = n_combos(3,D+h)
     n = nods
     #clos = n.get_neighbors_x(j,['x','y'],N)
     clos = n.get_neighbors(dim,j,N)
@@ -91,7 +97,7 @@ def diff_gen(j,nods,D,h,dim):
     A = np.zeros((N,N))
 
     for i in range(N):
-        A[:,i] = make_combos([diffsx[i],diffsy[i]],2)
+        A[:,i] = make_combos([diffsx[i],diffsy[i]],D+h)
 
     thelist = make_combos2('xy',D+h)
     b = np.zeros(int(N))
@@ -101,7 +107,7 @@ def diff_gen(j,nods,D,h,dim):
 
 
 def diff_y(j,nods,D,h):
-    N = n_combos(3,2)
+    N = n_combos(3,D+h)
     n = nods
     clos = n.get_neighbors_y(j,N)
 
@@ -113,13 +119,32 @@ def diff_y(j,nods,D,h):
     A = np.zeros((N,N))
 
     for i in range(N):
-        A[:,i] = make_combos([diffsx[i],diffsy[i]],2)
+        A[:,i] = make_combos([diffsx[i],diffsy[i]],D+h)
     thelist = make_combos2('xy',D+h)
     b = np.zeros(int(N))
     b[thelist.index('y'*D)] = factorial(D)
 
     soln = svdsolve(A,b)
     return clos.i,soln
+
+def make_stiffness(nodes,D,h,dim,labelname = None):
+    n = nodes
+    M = n.lennodes
+    if D == 0:
+        return np.eye(M)
+    A = np.zeros((M,M))
+    if not labelname:
+        for i in range(0,n.lennodes):
+            ids, soln = diff_gen(i,n,D,h,dim)
+            A[i][ids] = soln
+    else:
+        ind = n.labnames[labelname]
+        w = np.where(n.labels == ind)[0]
+        for i in w:
+            ids, soln = diff_gen(i,n,D,h,dim)
+            A[i][ids] = soln
+
+    return A
 
 class SubNode(Nodes):
     def __init__(self,i,refspace):
