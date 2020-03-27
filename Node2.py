@@ -64,7 +64,7 @@ class Nodes:
         plt.legend([l for l in self.labnames])
 
 def diff_x(j,nods,D,h):
-    N = n_combos(3,2)
+    N = n_combos(3,D+h)
     n = nods
     #clos = n.get_neighbors_x(j,['x','y'],N)
     clos = n.get_neighbors('x',j,N)
@@ -76,7 +76,7 @@ def diff_x(j,nods,D,h):
     A = np.zeros((N,N))
 
     for i in range(N):
-        A[:,i] = make_combos([diffsx[i],diffsy[i]],2)
+        A[:,i] = make_combos([diffsx[i],diffsy[i]],D+h)
 
     thelist = make_combos2('xy',D+h)
     b = np.zeros(int(N))
