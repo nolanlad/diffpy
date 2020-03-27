@@ -55,8 +55,15 @@ def get_linearly_dependent_rows(matrix,b):
                 if np.abs(inner_product - norm_j * norm_i) < 1E-5:
                     dept_rows.extend([i,j])
     idxs = list(set(dept_rows))
-    return idxs
-    
+    return idxs   
+
+def bigsolve(A,b):
+    s = A.shape
+    if s[0] == s[1]:
+        if abs(np.linalg.det(A)) > 1e-7:
+            return np.linalg.solve(A,b)
+        else:
+            return svdsolve(A,b)
 
 def svdsolve(A,b):
     Ainv = np.linalg.pinv(A)

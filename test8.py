@@ -15,8 +15,6 @@ xx,yy = np.meshgrid(x,y)
 xx = xx.reshape(-1)
 yy = yy.reshape(-1)
 
-x1 = xx[25]
-y1 = yy[25]
 
 
 from Node2 import *
