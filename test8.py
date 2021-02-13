@@ -7,9 +7,9 @@ Solve for steady state solution for heat conduction in a
 square of material with adiabatic walls and constant temperatures
 at top and bottom
 '''
-
-x = np.linspace(0,1,10)
-y = np.linspace(0,1,10)
+N=20
+x = np.linspace(0,1,N)
+y = np.linspace(0,1,N)
 
 xx,yy = np.meshgrid(x,y)
 xx = xx.reshape(-1)
@@ -33,12 +33,13 @@ n.add_labels(labels,labnam)
 # n.plot('x','y')
 # plt.show()
 
-h = 5 # for some reason h < 3 produces unstable solutions
+h = 3 # for some reason h < 3 produces unstable solutions
 
 Axx = make_stiffness(n,2,h,'x')
 Ayy = make_stiffness(n,2,h,'y')
 Ax =  make_stiffness(n,1,h,'x')
 AI =  make_stiffness(n,0,h,'x')
+Ay =  make_stiffness(n,1,h,'y')
 
 A = np.zeros(Axx.shape)
 
@@ -49,33 +50,51 @@ mass = np.where(n.labels == n.labnames['mass'])[0]
 for i in mass:
     A[i] = Axxyy[i]
 
-edgex = np.where((n.labels == n.labnames['edgex1'])|(n.labels == n.labnames['edgex2']))[0]
+isedgex = (n.labels == n.labnames['edgex1'])|(n.labels == n.labnames['edgex2'])
+
+
+edgex = np.where(isedgex)[0]
 
 for i in edgex:
-    A[i] = Ax[i]
+    A[i] = AI[i]
 
-edgey = np.where((n.labels == n.labnames['edgey1'])|(n.labels == n.labnames['edgey2']))[0]
+isedgey = (n.labels == n.labnames['edgey1'])|(n.labels == n.labnames['edgey2'])
+edgey = np.where(isedgey&(~isedgex))[0]
 
 for i in edgey:
     A[i] = AI[i]
 
-edgey1 = np.where((n.labels == n.labnames['edgey1']))[0]
+edgex1 = np.where((n.labels == n.labnames['edgey2']))[0]
 
 b = np.zeros(n.lennodes)
 # b = np.ones(n.lennodes)
-for i in edgey1:
-    b[i] = 300
+for i in edgex1:
+    b[i] = 100
 
-edgey2 = np.where((n.labels == n.labnames['edgey2']))[0]
+edgex2 = np.where((n.labels == n.labnames['edgex2']))[0]
 
-for i in edgey2:
+for i in edgex2:
+    b[i] = 100
+
+edgex1 = np.where((n.labels == n.labnames['edgex1']))[0]
+
+# b = np.ones(n.lennodes)
+for i in edgex1:
+    b[i] = 400
+
+edgex2 = np.where((n.labels == n.labnames['edgey1']))[0]
+
+for i in edgex2:
     b[i] = 400
 
 T = svdsolve(A,b)
-Ts = T.reshape((10,10))
+Ts = T.reshape((N,N))
 plt.imshow(Ts)
 plt.colorbar()
 plt.show()
-plt.imshow(A)
+
+import numpy.ma as ma
+
+plt.imshow(ma.masked_equal(A,0))
 plt.show()
 print(np.linalg.det(A))
