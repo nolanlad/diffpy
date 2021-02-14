@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from utilities import *
+from scipy import sparse
 
 
 class Nodes:
@@ -20,6 +21,7 @@ class Nodes:
         self.labels = labs
         self.labnames = labnames
     def size(self):
+        ''' Returns number of nodes in system'''
         return self.lennodes
         #return len(self.space[self.dims[0]])
     def get_dim(self,name):
@@ -56,6 +58,10 @@ class Nodes:
             dif = self.get_dim(idim) - nod.get_dim(idim)
             criterion = criterion*np.arctan(0.1 + np.abs(dif))
         return  SubNode(np.argsort(criterion)[:N],self)
+
+    def get_label_ids(self,labelname):
+        ind = self.labnames[labelname]
+        return self.labels == ind
 
     def plot(self,dim1,dim2,*args,**kwargs):
         for l in set(self.labels):
@@ -132,6 +138,9 @@ def make_stiffness(nodes,D,h,dim,labelname = None):
     n = nodes
     M = n.lennodes
     A = np.zeros((M,M))
+    #print(A.shape)
+    #A = sparse.csr_matrix((M,M))
+    #print(A.shape)
     if D == 0:
         #return np.eye(M)
         if labelname:
@@ -142,7 +151,7 @@ def make_stiffness(nodes,D,h,dim,labelname = None):
             return A
         else:
             return np.eye(M)
-    A = np.zeros((M,M))
+    #A = np.zeros((M,M))
     if not labelname:
         for i in range(0,n.lennodes):
             ids, soln = diff_gen(i,n,D,h,dim)
