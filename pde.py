@@ -1,5 +1,6 @@
 from Node2 import *
 from scipy.sparse import csr_matrix
+from scipy.sparse.linalg import spsolve
 import numpy as np
 
 
@@ -25,7 +26,9 @@ class LinOp:
         self.targ = targ
     
     def solve(self):
-        return np.linalg.solve(self.mat,self.targ)
+        mats = csr_matrix(self.mat)
+        #return np.linalg.solve(self.mat,self.targ)
+        return spsolve(mats,self.targ)
 
     def __add__(self,other):
         return LinOp(self.mat + other.mat,self.targ + other.targ)
@@ -36,13 +39,16 @@ class OpList:
     def __init__(self,oplist=[]):
         self.oplist = oplist
 
+    def __call__(self,vec):
+        return self.forward(vec)
+
     def forward(self,vec):
         prod = np.zeros(vec.shape)
         targ = np.zeros(vec.shape)
         for op in self.oplist:
             targ+=op.target
             prod += op.forward(vec)
-        return prod, targ
+        return prod - targ
 
     def combine_linops(self):
         lop = None

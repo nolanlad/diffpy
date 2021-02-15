@@ -38,3 +38,10 @@ ops.append(Diff(n,'edgey','y',0,110))
 opl = OpList(ops)
 
 opl.combine_linops()
+
+T = opl.solve()
+
+Ts = T.reshape((N,N))
+
+plt.imshow(Ts,interpolation='bicubic')
+plt.show()
