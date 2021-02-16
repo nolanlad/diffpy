@@ -111,6 +111,26 @@ def diff_gen(j,nods,D,h,dim):
     soln = svdsolve(A,b)
     return clos.i,soln
 
+def diff_gen_1D(j,nods,D,h,dim):
+    N = n_combos(3,D+h)
+    n = nods
+    #clos = n.get_neighbors_x(j,['x','y'],N)
+    clos = n.get_neighbors(dim,j,N)
+
+    nod = n.get_node(j)
+    diffsx = clos.get_dim('x') - nod.get_dim('x')
+    diffsy = clos.get_dim('y') - nod.get_dim('y')
+
+    A = np.zeros((N,N))
+
+    for i in range(N):
+        A[:,i] = make_combos([diffsx[i],diffsy[i]],D+h)
+
+    thelist = make_combos2('xy',D+h)
+    b = np.zeros(int(N))
+    b[thelist.index(dim*D)] = factorial(D)
+    soln = svdsolve(A,b)
+    return clos.i,soln
 
 # def diff_y(j,nods,D,h):
 #     N = n_combos(3,D+h)
