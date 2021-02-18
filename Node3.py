@@ -26,7 +26,8 @@ def is_independent(A,v):
     else:
         return np.concatenate((A,np.transpose(v.reshape(1,-1))),axis=1),True
 
-def get_node_soln(n,nodes,dim,D,h):
+def get_node_soln(i,nodes,D,h,dim):
+    n = nodes.get_node(i)
     diffx = n.get_dim('x') - nodes.get_dim('x')
     diffy = n.get_dim('y') - nodes.get_dim('y')
     dist = np.sqrt(diffx**2 + diffy**2)
@@ -47,7 +48,7 @@ def get_node_soln(n,nodes,dim,D,h):
     b[thelist.index(dim*D)] = factorial(D)
     soln = svdsolve(A,b)
     #soln = np.linalg.solve(A,b)
-    return soln,inds
+    return inds,soln
 
 def test(n,nodes,dim,D,h):
     diffx = n.get_dim('x') - nodes.get_dim('x')
@@ -75,7 +76,7 @@ def test(n,nodes,dim,D,h):
     soln = svdsolve(A,b)
     return soln,inds,A,b
 
-def make_stiffness_5(nodes,D,h,dim,labelname = None):
+def make_stiffness_general(nodes,D,h,dim,labelname = None):
     n = nodes
     M = n.lennodes
     A = np.zeros((M,M))
@@ -91,13 +92,15 @@ def make_stiffness_5(nodes,D,h,dim,labelname = None):
     if not labelname:
         for i in range(0,n.lennodes):
             #print(i)
-            soln,ids = get_node_soln(n.get_node(i),n,dim,D,h)
+            #ids,soln = get_node_soln(n.get_node(i),n,dim,D,h)
+            ids,soln = get_node_soln(i,n,D,h,dim)
             A[i][ids] = soln
     else:
         ind = n.labnames[labelname]
         w = np.where(n.labels == ind)[0]
         for i in w:
-            ids, soln = diff_gen(i,n,D,h,dim)
+            ids,soln = get_node_soln(i,n,D,h,dim)
+            #ids,soln = get_node_soln(n.get_node(i),n,dim,D,h)
             A[i][ids] = soln
 
     return A
