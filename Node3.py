@@ -18,6 +18,7 @@ def is_independent(A,v):
 
 
 def is_independent(A,v):
+    ''' Checks the linear dependence between the vectos in A and v'''
     v = np.array(v)
     svdsol = svdsolve(A,v)
     diff = np.abs(A@svdsol - v)
@@ -27,6 +28,9 @@ def is_independent(A,v):
         return np.concatenate((A,np.transpose(v.reshape(1,-1))),axis=1),True
 
 def get_node_soln(i,nodes,D,h,dim):
+    '''Chosses linearly independent nodes to calculate the discrete derivative
+    it is an attempt to make a very robust node choosing scheme that does not break 
+    under any circumstances'''
     n = nodes.get_node(i)
     diffx = n.get_dim('x') - nodes.get_dim('x')
     diffy = n.get_dim('y') - nodes.get_dim('y')

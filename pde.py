@@ -1,4 +1,5 @@
 from Node2 import *
+from Node3 import *
 from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import spsolve
 import numpy as np
@@ -14,6 +15,22 @@ class Diff:
         self.D = D
         #self.target = target
         self.mat = make_stiffness(nodes,D,h,dim,labelname=label)
+        self.target = np.zeros(nodes.lennodes)
+        self.target[nodes.get_label_ids(label)] = target
+
+    def forward(self,vec):
+        return self.mat@vec
+
+class Diff2:
+    islinop = True
+    def __init__(self,nodes,label,dim,D,target,h=3):
+        self.nodes = nodes
+        self.label = label
+        self.dim = dim
+        self.h = h
+        self.D = D
+        #self.target = target
+        self.mat = make_stiffness_general(nodes,D,h,dim,labelname=label)
         self.target = np.zeros(nodes.lennodes)
         self.target[nodes.get_label_ids(label)] = target
 

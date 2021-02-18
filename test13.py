@@ -11,8 +11,8 @@ square of material with adiabatic walls and constant temperatures
 at top and bottom
 '''
 N=31
-x = np.arange(0,N)
-y = np.arange(0,N)
+x = np.linspace(0,2,N)
+y = np.linspace(0,2,N)
 
 xx,yy = np.meshgrid(x,y)
 xx = xx.reshape(-1)
@@ -26,9 +26,8 @@ sol,inds,A,b = test(nods.get_node(41),nods,'x',2,0)
 sol,inds,A,b = test(nods.get_node(17),nods,'x',2,0)
 
 A = make_stiffness_general(nods,1,3,'x')
-A2 = make_stiffness(nods,1,3,'x')
 
-res = A@nods.get_dim('x')
+res = -1*A@nods.get_dim('x')
 
 plt.imshow(res.reshape((N,N)))
 plt.colorbar()
@@ -39,24 +38,28 @@ zz = xx*xx*yy
 dza = -1*A@zz
 dz = 2*xx*yy
 
-plt.imshow(dz.reshape((N,N))-dza.reshape((N,N)))
+plt.imshow(dza.reshape((N,N)))
 plt.colorbar()
 plt.show()
-#====
-res = A2@nods.get_dim('x')
 
-plt.imshow(res.reshape((N,N)))
+A = make_stiffness_general(nods,1,3,'y')
+#A2 = make_stiffness(nods,,1,'y')
+
+res2 = -1*A@nods.get_dim('y')
+
+plt.imshow(res2.reshape((N,N)))
 plt.colorbar()
 plt.show()
 
 zz = xx*xx*yy
 
-dza = A2@zz
-dz = 2*xx*yy
+dza = -1*A@zz
+dz = xx*xx
 
-plt.imshow(dz.reshape((N,N))-dza.reshape((N,N)))
+plt.imshow(dza.reshape((N,N)))
 plt.colorbar()
 plt.show()
+
 
 
 '''
